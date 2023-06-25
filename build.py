@@ -35,6 +35,14 @@ def copy(src, dst, cwd=None, recurse=False):
 
     return True
 
+
+def make(*args, cwd=None, verbose=False):
+    cmd = [ "make", f'-j{CPU_COUNT}'] + list(args)
+    if verbose:
+        cmd.append("VERBOSE=1")
+    return logged_run(cmd, cwd=cwd, check=True)
+
+
 def build_llvm(args):
     # create the build directory
     os.makedirs(build_dir, exist_ok=True)
@@ -64,9 +72,9 @@ def build_llvm(args):
 
     # build LLVM, optionally installing it
     if args.install:
-        logged_run(['make', 'install', f'-j{CPU_COUNT}'], cwd=build_dir, check=True)
+        make("install", cwd=build_dir, verbose=args.verbose)
     else:
-        logged_run(['make', f'-j{CPU_COUNT}'], cwd=build_dir, check=True)
+        make(cwd=build_dir, verbose=args.verbose)
 
     # install the linker script to either the install destination or the build directory
     if args.install:
